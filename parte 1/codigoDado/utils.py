@@ -350,7 +350,7 @@ def rbf_kernel(x, y=None, gamma=None):
         y = x
     if gamma is None:
         gamma = 1.0 / x.shape[1]  # 1.0 / n_features
-    return np.exp(-gamma * (-2.0 * np.dot(x, y.T) +
+    return np.exp(gamma * (-2.0 * np.dot(x, y.T) +
                             np.sum(x * x, axis=1).reshape((-1, 1)) + np.sum(y * y, axis=1).reshape((1, -1))))
 
 
@@ -701,9 +701,7 @@ class defaultkeydict(collections.defaultdict):
     4
     """
 
-    def __missing__(self, key):
-        self[key] = result = self.default_factory(key)
-        return result
+    
 
 
 class hashabledict(dict):
