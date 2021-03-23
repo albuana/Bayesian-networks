@@ -1,7 +1,7 @@
 """
-Grupo 53 
-Ana Albuquerque 53512
-Gonçalo Antunes
+Grupo53 
+Ana Alburquerque 53512
+Gonçalo Antunes 52831
 Tiago Cabrita 52741
 """
 
@@ -12,20 +12,22 @@ from probabilityPlus import *
 from itertools import *
 
 def cond_indep(x,y,e,rede):   
+    if isinstance(e, str):
+        e=e.split(" ")
     dic=graphToDic(rede)
     caminhos=find_all_paths(dic,x,y,[])
     inativosCaminho=[]
-    for c in caminhos:
+    for i in caminhos:
         temInativos=False
-        if c:
-            triplos=triplosEmCaminho(c)
-        for j in e:
+        if i:
+            triplos=triplosEmCaminho(i)
             for t in triplos:
-                if j in t:
-                    temInativos=True
+                for j in e:
+                    if j in t:
+                        temInativos=True
         inativosCaminho.append(temInativos)
-    for c in inativosCaminho:
-        if c==False:
+    for i in inativosCaminho:
+        if i==False:
             return False
     return True
 
@@ -57,19 +59,26 @@ def cond_indep_explica(x,y,e,rede):
 def todos_cond_indeps(rede):
     var=set(rede.variables)
     lista=[]
-    allE=all_possible_e(rede)
     for x in var:
         otherX=var-{x}
         for y in otherX:
+            allE=all_possible_e(rede,x,y)
             for z in allE:
                 i=cond_indep(x,y,z,rede)
-                if i:
+                if i and checkAlreadyIn(x,y,z,lista):
                     lista.append((x,y,z))
     return lista
 
 """
 Funções Auxiliares
 """
+def checkAlreadyIn(x,y,z,lista):
+    for i in range(0,len(lista)):
+        cond=set(z)==set(lista[i][2])
+        if x in lista[i] and y in lista[i] and cond:
+            return False    
+    
+    return True
 
 def find_all_paths(graph, start, end, path=[]):
     path = path + [start]
@@ -92,17 +101,18 @@ def graphToDic(rede):
         myDict[v]=rede.variable_node(v).parents+rede.variable_node(v).children
     return myDict
 
-def all_possible_e(rede):
+def all_possible_e(rede,x,y):
     var=set(grafo.variables)
     lista=[]
+    var=var-{x}-{y}
     for i in var:
         lista.append(i)
     for i in range(2,len(var)+1):
-        perm = permutations(var, i)  
-        lista.append(perm)
+        perm = permutations(var, i)
+        for j in perm:
+            lista.append(j)
     return lista
 
-        
 def triplosEmCaminho(caminho):
     triplos=[]
     for i in range(0,len(caminho)):
@@ -117,13 +127,12 @@ def checkTriplo(triplo,e,rede):
     explicacao=""
 
     if triplo[0] in pais2 and triplo[1] in pais3:
-        explicacao += "uma cadeia causal "
+        explicacao += "Cadeia Causal "
     if triplo[0] in pais2 and triplo[2] in pais2:
-        explicacao += "um efeito comum "
+        explicacao += "Efeito Comum "
     if triplo[1] in pais1 and triplo[1] in pais3:
-        explicacao += "uma causa comum "
+        explicacao += "Causa Comum "
     for i in e:
         if i in triplo:
-            return explicacao + "inativ@"
-    return explicacao + "ativ@"
-    
+            return explicacao + "inativo"
+    return explicacao + "ativo"
